@@ -8,7 +8,7 @@
     <style>
         body {
             padding: 20px;
-
+            font-family: sans-serif;
         }
 
         #output {
@@ -20,18 +20,49 @@
             overflow-y: auto;
             margin-bottom: 10px;
         }
+
+        button {
+            border-radius: 4px;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        @keyframes blink {
+            50% {
+                border-color: transparent;
+            }
+        }
+
+        .typing-animation {
+            overflow: hidden;
+            /* Ensures the content is not revealed until the animation */
+            border-right: .15em solid black;
+            /* The typewriter cursor */
+            white-space: nowrap;
+            /* Keeps the content on a single line */
+            animation: typing 3s steps(40, end), blink .75s step-end infinite;
+            /* Adjust the typing speed by changing the 3.5s value (3.5 seconds in this case). The steps(40, end) can be modified to change the number of steps, which can also affect speed. */
+        }
     </style>
 </head>
 
 <body>
 
-    <h2>CSV to XLSX Converter v1.5</h2>
+    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v1.5 👩‍🚀</h2>
 
     <input type="file" id="csvFileInput" accept=".csv" style="height: 50px">
 
     <button id="processButton" style="height: 50px; width: 100px;">Convert</button>
 
-    <div id="output"></div>
+    <div id="output" style="border-radius: 10px;"></div>
 
     <button id="downloadButton" disabled style="height: 50px; width: 200px;">Download XLSX</button>
 
