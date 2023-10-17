@@ -76,7 +76,7 @@
         async function convertCSVToXLSX(csvData) {
             printLog("Start Processing")
 
-            const EUList = ["DE", "FR", "IT", "ES", "BE", "NL", "CZ", "EE"];
+            const EUList = ["DE", "FR", "IT", "ES", "BE", "NL", "CZ", "EE", "LV", "FI"];
             const UKList = ["GB"];
             const AUList = ["AU"];
 
@@ -265,7 +265,7 @@
                     }
                 } else {
                     console.log("Other shipping: skip")
-                    printLog("Other shipping: skipped: " + orderNo)
+                    printLog("Other shipping: skipped: " + orderNo + " " + country)
                     continue;
                 }
 
@@ -279,6 +279,7 @@
                                 state = stateEn
                             } else {
                                 console.log('State information not found.');
+                                printLog('State information not found.' + orderNo)
                             }
 
                             const keyValue = Object.entries(itemCounts);
