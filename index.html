@@ -19,6 +19,8 @@
             box-sizing: border-box;
             overflow-y: auto;
             margin-bottom: 10px;
+            line-height: 24px;
+            border-radius: 0px 0px 10px 10px;
         }
 
         button {
@@ -51,18 +53,34 @@
             animation: typing 3s steps(40, end), blink .75s step-end infinite;
             /* Adjust the typing speed by changing the 3.5s value (3.5 seconds in this case). The steps(40, end) can be modified to change the number of steps, which can also affect speed. */
         }
+
+        #progress-container {
+            width: 100%;
+            background-color: #f3f3f3;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 30px;
+            background-color: #4CAF50;
+            transition: width 0.3s ease-in-out;
+        }
     </style>
 </head>
 
 <body>
 
-    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v1.6 👩‍🚀</h2>
+    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v1.7 👩‍🚀</h2>
 
     <input type="file" id="csvFileInput" accept=".csv" style="height: 50px">
 
     <button id="processButton" style="height: 50px; width: 100px;">Convert</button>
 
-    <div id="output" style="border-radius: 10px;"></div>
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <div id="output"></div>
 
     <button id="downloadButton" disabled style="height: 50px; width: 200px;">Download XLSX</button>
 
@@ -152,6 +170,14 @@
             data.unshift(headers);
             let promises = [];
 
+            if (csvData.length > 500) {
+                printLog("seems you uploaded too many orders.")
+            }
+
+            const progressBar = document.getElementById("progress-bar");
+            const totalRows = csvData.length - 2; // Subtracting 1 for the header and 1 for the last row 
+
+
             for (let currentRowNo = 1; currentRowNo < csvData.length - 1; currentRowNo++) {
 
                 const row = csvData[currentRowNo];
@@ -202,10 +228,10 @@
                     continue;
                 }
 
-                // if (row[4] != "unfulfilled") {
-                //     printLog("<b>Skipped</b> Special Order: " + orderNo + " <b style='margin-left:20px'>Reason: </b>" + row[4])
-                //     continue;
-                // }
+                if (row[4] != "unfulfilled") {
+                    printLog("<b>Skipped</b> Special Order: " + orderNo + " <b style='margin-left:20px'>Reason: </b>" + row[4])
+                    continue;
+                }
 
                 // handle SKU
                 let allItems = [];
@@ -304,6 +330,9 @@
                 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
                 await delay(2000);
 
+                const progressPercentage = (currentRowNo / totalRows) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+
                 promises.push(
                     getStateNameFromPostcode(postcode, country)
                         .then(stateEn => {
@@ -333,7 +362,7 @@
                 );
             }
             await Promise.all(promises);
-            printLog("All Finished")
+            printLog("Mission Complete!")
             document.getElementById("downloadButton").disabled = false;
             return data;
         }
