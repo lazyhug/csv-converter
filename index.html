@@ -125,7 +125,7 @@
         async function convertCSVToXLSX(csvData) {
             printLog("Start Processing")
 
-            const EUList = ["DE", "FR", "IT", "ES", "BE", "NL", "CZ", "EE", "LV", "FI"];
+            const EUList = ["DE", "FR", "IT", "ES", "BE", "NL", "CZ", "EE", "LV", "FI", "PT", "LT", "PL"];
             const UKList = ["GB"];
             const AUList = ["AU"];
 
@@ -340,7 +340,7 @@
                                 state = stateEn
                             } else {
                                 console.log('State information not found.');
-                                printLog('State information not found.' + orderNo)
+                                printLog('State information not found. ' + orderNo)
                             }
 
                             const keyValue = Object.entries(itemCounts);
