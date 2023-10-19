@@ -123,8 +123,6 @@
         });
 
         async function convertCSVToXLSX(csvData) {
-            printLog("Start Processing")
-
             const EUList = ["DE", "FR", "IT", "ES", "BE", "NL", "CZ", "EE", "LV", "FI", "PT", "LT", "PL"];
             const UKList = ["GB"];
             const AUList = ["AU"];
@@ -171,8 +169,11 @@
             let promises = [];
 
             if (csvData.length > 500) {
-                printLog("seems you uploaded too many orders.")
+                printLog("😈 seems you uploaded too many orders.")
+                return
             }
+
+            printLog("🚀Taking Off🚀")
 
             const progressBar = document.getElementById("progress-bar");
             const totalRows = csvData.length - 2; // Subtracting 1 for the header and 1 for the last row 
