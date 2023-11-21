@@ -103,21 +103,35 @@
             background-position: left bottom;
         }
 
+        .control-panel{
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+    opacity: 1;
+    visibility: visible;
+        }
+
+        .control-panel.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
     </style>
 </head>
 
 <body>
 
-    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v1.9 👩‍🚀</h2>
+    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v1.91 👩‍🚀</h2>
 
     <div style="margin-bottom: 20px">Suffix: <input type="text" id="suffix" value=""></div>
 
-    <div class="file-upload-wrapper">
-        <input type="file" id="csvFileInput" accept=".csv" style="display: none;" />
-        <button id="uploadButton" class="upload-btn">Upload Data</button>
-    </div>
+    <div class="control-panel">
+        <div class="file-upload-wrapper">
+            <input type="file" id="csvFileInput" accept=".csv" style="display: none;" />
+            <button id="uploadButton" class="upload-btn">Upload Data</button>
+        </div>
 
-    <button id="processButton">Engine Start</button>
+        <button id="processButton">Engine Start</button>
+
+    </div>
 
     <div id="progress-container">
         <div id="progress-bar"></div>
@@ -142,6 +156,12 @@
             const file = fileInput.files[0];
 
             if (file) {
+
+                var controlPanel = document.querySelector('.control-panel');
+                if (controlPanel) {
+                    controlPanel.classList.add('hidden');
+                }
+
                 Papa.parse(file, {
                     complete: function (results) {
                         convertCSVToXLSX(results.data).then((convertedData) => {
