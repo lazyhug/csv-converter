@@ -70,7 +70,7 @@
 
 <body>
 
-    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v1.7 👩‍🚀</h2>
+    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v1.8 👩‍🚀</h2>
 
     <input type="file" id="csvFileInput" accept=".csv" style="height: 50px">
 
@@ -144,6 +144,7 @@
                 "收件人税号",
                 "发件人税号",
                 "收件人身份证号",
+                "一票多件（注意：选是则一个SKU为一个包裹）",
                 "运德编号",
                 "产品编码",
                 "数量",
@@ -183,7 +184,7 @@
 
                 const row = csvData[currentRowNo];
                 let firstRowNo = currentRowNo;
-                const orderNo = row[0].substring(1) + "a";
+                const orderNo = row[0].substring(1) + "TEST";
 
                 console.log("Start Processing: " + orderNo)
                 const country = row[42];
@@ -346,11 +347,11 @@
 
                             const keyValue = Object.entries(itemCounts);
 
-                            const newRow = ["运德深圳A仓", "", orderNo, country, postcode, name, state, city, address1, address2, phone, email, shippingMethod, "", "", "", "", keyValue[0][0], keyValue[0][1]];
+                            const newRow = ["运德深圳A仓", "", orderNo, country, postcode, name, state, city, address1, address2, phone, email, shippingMethod, "", "", "", "否", "", keyValue[0][0], keyValue[0][1]];
                             data.push(newRow);
 
                             for (let i = 1; i < keyValue.length; i++) {
-                                const newExtraRow = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", keyValue[i][0], keyValue[i][1]];
+                                const newExtraRow = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", keyValue[i][0], keyValue[i][1]];
                                 data.push(newExtraRow);
                             }
 
