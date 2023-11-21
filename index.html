@@ -65,16 +65,59 @@
             background: linear-gradient(to right, #f6046b, #f7d914);
             transition: width 0.3s ease-in-out;
         }
+
+        .file-upload-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .upload-btn, #processButton {
+            display: inline-block;
+            padding: 10px 25px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: opacity 0.3s ease;
+        }
+
+        .upload-btn{
+            background-color: #007aff;
+        }
+
+        #processButton{
+            background-color: #47ca5f;
+            background-size: 200% 100%;
+            background-image: linear-gradient(to right, #f7542c 50%, #000 50%);
+            transition: background-position 0.5s ease;
+            background-position: right bottom;
+        }
+
+        .upload-btn:hover, #processButton:hover {
+            opacity: 0.9;
+        }
+
+        
+        #processButton:hover {
+            background-position: left bottom;
+        }
+
     </style>
 </head>
 
 <body>
 
-    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v1.81 👩‍🚀</h2>
+    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v1.9 👩‍🚀</h2>
 
-    <input type="file" id="csvFileInput" accept=".csv" style="height: 50px">
+    <div style="margin-bottom: 20px">Suffix: <input type="text" id="suffix" value=""></div>
 
-    <button id="processButton" style="height: 50px; width: 100px;">Convert</button>
+    <div class="file-upload-wrapper">
+        <input type="file" id="csvFileInput" accept=".csv" style="display: none;" />
+        <button id="uploadButton" class="upload-btn">Upload Data</button>
+    </div>
+
+    <button id="processButton">Engine Start</button>
 
     <div id="progress-container">
         <div id="progress-bar"></div>
@@ -112,6 +155,10 @@
                 printLog("No file selected.")
             }
         });
+
+        document.getElementById('uploadButton').addEventListener('click', function() {
+    document.getElementById('csvFileInput').click();
+});
 
         document.getElementById("downloadButton").addEventListener("click", function () {
             console.log(xlsxData)
@@ -166,6 +213,12 @@
                 "MT03E"
             ]
 
+            let suffix = "a"
+            var inputSuffixValue = document.getElementById('suffix').value;
+            if(inputSuffixValue){
+                suffix = inputSuffixValue
+            }
+
             data.unshift(headers);
             let promises = [];
 
@@ -174,7 +227,7 @@
                 return
             }
 
-            printLog("🚀Taking Off🚀")
+            printLog("🚀 Taking Off 🚀")
 
             const progressBar = document.getElementById("progress-bar");
             const totalRows = csvData.length - 2; // Subtracting 1 for the header and 1 for the last row 
@@ -184,7 +237,7 @@
 
                 const row = csvData[currentRowNo];
                 let firstRowNo = currentRowNo;
-                const orderNo = row[0].substring(1) + "a18";
+                const orderNo = row[0].substring(1) + suffix;
 
                 console.log("Start Processing: " + orderNo)
                 const country = row[42];
@@ -364,7 +417,7 @@
                 );
             }
             await Promise.all(promises);
-            printLog("Mission Complete!")
+            printLog("✅ Mission Complete! ✅")
             document.getElementById("downloadButton").disabled = false;
             return data;
         }
