@@ -263,6 +263,7 @@
                 const country = row[42];
                 let postcode = row[40];
                 postcode = postcode.replace(/\s+/g, '');
+                postcode = postcode.replace(/'/g, '');
                 const name = row[34];
                 let state = "XX";
                 const city = row[39];
