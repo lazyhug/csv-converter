@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zip Code to State Finder</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Custom styles for loading spinner */
+        .loader {
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen font-sans">
+
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Zip Code to State Finder</h1>
+        
+        <!-- Input Form -->
+        <div class="flex space-x-3 mb-4">
+            <input 
+                type="text" 
+                id="zipcode-input" 
+                placeholder="Enter zip code..." 
+                class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+            <button 
+                id="submit-btn" 
+                class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
+            >
+                Submit
+            </button>
+        </div>
+
+        <!-- Results Area -->
+        <div id="results-container" class="mt-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Results:</h2>
+            <!-- Loading Spinner -->
+            <div id="loader" class="hidden loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-10 w-10 mx-auto"></div>
+            <!-- Results List -->
+            <ul id="results-list" class="list-disc list-inside space-y-2">
+                <!-- Results will be injected here -->
+            </ul>
+            <!-- Message for no results -->
+            <p id="no-results" class="text-gray-500 italic hidden">No results found for that zip code.</p>
+            <!-- Error Message -->
+            <p id="error-message" class="text-red-500 font-medium hidden"></p>
+        </div>
+    </div>
+
+    <script>
+        const submitBtn = document.getElementById('submit-btn');
+        const zipInput = document.getElementById('zipcode-input');
+        const resultsList = document.getElementById('results-list');
+        const noResultsMsg = document.getElementById('no-results');
+        const errorMsg = document.getElementById('error-message');
+        const loader = document.getElementById('loader');
+
+        // API Key (as provided)
+        const API_KEY = '61015c80-5918-11ee-8a59-3d675e875642';
+
+        /**
+         * Fetches state information from a postcode.
+         * @param {string} postcode The zip code to search for.
+         * @returns {Promise<Array|null>} A promise that resolves to an array of results or null.
+         */
+        async function getStateNameFromPostcode(postcode) {
+            let postcodeToStateAPI = `https://app.zipcodebase.com/api/v1/search?apikey=${API_KEY}&codes=${postcode}`;
+
+            try {
+                // Make a GET request to the postcode-to-state API.
+                const response = await fetch(postcodeToStateAPI);
+
+                // Check if the request was successful (status code 200).
+                if (response.ok) { // Use response.ok (status 200-299)
+                    const data = await response.json();
+                    // The API nests results under the query, which itself is nested under "results"
+                    const results = data.results[postcode];
+                    
+                    if (results && results.length > 0) {
+                        return results; // Return the full array of results
+                    } else {
+                        console.log('No data found for the given postcode.');
+                        return null; // No results found
+                    }
+                } else {
+                    console.error('Failed to fetch state information. Status:', response.status);
+                    return null; // API returned an error status
+                }
+            } catch (error) {
+                console.error('An error occurred while fetching state information:', error);
+                return null; // Network error or other exception
+            }
+        }
+
+        /**
+         * Clears all messages and results from the UI.
+         */
+        function clearResults() {
+            resultsList.innerHTML = '';
+            noResultsMsg.classList.add('hidden');
+            errorMsg.classList.add('hidden');
+        }
+
+        /**
+         * Handles the form submission.
+         */
+        async function handleSubmit() {
+            const zipCode = zipInput.value.trim();
+            if (!zipCode) {
+                errorMsg.textContent = 'Please enter a zip code.';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            // Clear previous results and show loader
+            clearResults();
+            loader.classList.remove('hidden');
+            submitBtn.disabled = true;
+
+            const results = await getStateNameFromPostcode(zipCode);
+
+            // Hide loader and re-enable button
+            loader.classList.add('hidden');
+            submitBtn.disabled = false;
+
+            if (results) {
+                // We have results, display them
+                results.forEach(location => {
+                    const li = document.createElement('li');
+                    // Add condition: if country_code is GB, use state, otherwise use state_en
+                    const stateName = location.country_code === 'GB' ? location.state : location.state_en;
+                    li.textContent = `${stateName} (${location.country_code})`;
+                    li.className = 'text-gray-800';
+                    resultsList.appendChild(li);
+                });
+            } else {
+                // No results found
+                noResultsMsg.classList.remove('hidden');
+            }
+        }
+
+        // Add event listeners
+        submitBtn.addEventListener('click', handleSubmit);
+        // Allow pressing Enter to submit
+        zipInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                handleSubmit();
+            }
+        });
+
+    </script>
+
+</body>
+</html>
