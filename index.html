@@ -119,7 +119,7 @@
 
 <body>
 
-    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v2.2 👩‍🚀</h2>
+    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v2.3 👩‍🚀</h2>
 
     <div style="margin-bottom: 20px">Suffix: <input type="text" id="suffix" value=""></div>
 
@@ -146,6 +146,7 @@
     <div style="margin-top: 20px">*Separate the order (p1,p2,...) if there are a lot of items. (overweight)</div>
     <hr>
     <p>Log:</p>
+    <p>2025-12-06: updated EUList, support PL, IT. Updated API key of zipcodebase.</p>
     <p>2025-11-24: updated UKList, EUList</p>
     <p>2025-11-07: added EP053E in electricList</p>
     <p>2025-10-26: added BLRECBASE in electricList</p>
@@ -233,7 +234,7 @@
         });
 
         async function convertCSVToXLSX(csvData) {
-            const EUList = ["DE", "FR", "AT", "BE", "GR", "IE", "NL", "UA", "CZ", "FI", "LT", "PT", "EE", "LV", "NO", "CH", "BG", "HR", "LU", "TR"];
+            const EUList = ["DE", "FR", "AT", "BE", "GR", "IE", "NL", "UA", "CZ", "FI", "LT", "PT", "EE", "LV", "NO", "CH", "BG", "HR", "LU", "TR", "PL", "IT"];
             const UKList = ["GB", "IE"];
             const AUList = ["AU"];
 
@@ -496,7 +497,7 @@
 
 
         async function getStateNameFromPostcode(postcode, country) {
-            let postcodeToStateAPI = 'https://app.zipcodebase.com/api/v1/search?apikey=61015c80-5918-11ee-8a59-3d675e875642&codes=' + postcode + '&country=' + country;
+            let postcodeToStateAPI = 'https://app.zipcodebase.com/api/v1/search?apikey=5f1d2b00-d25f-11f0-85f0-6995de82b700&codes=' + postcode + '&country=' + country;
 
             try {
                 // Make a GET request to the postcode-to-state API.
