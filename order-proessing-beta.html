@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Mission</title>
+    <style>
+        body {
+            padding: 20px;
+            font-family: sans-serif;
+        }
+
+        #output {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            line-height: 24px;
+            border-radius: 0px 0px 10px 10px;
+        }
+
+        button {
+            border-radius: 4px;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        @keyframes blink {
+            50% {
+                border-color: transparent;
+            }
+        }
+
+        .typing-animation {
+            overflow: hidden;
+            /* Ensures the content is not revealed until the animation */
+            border-right: .15em solid black;
+            /* The typewriter cursor */
+            white-space: nowrap;
+            /* Keeps the content on a single line */
+            animation: typing 3s steps(40, end), blink .75s step-end infinite;
+            /* Adjust the typing speed by changing the 3.5s value (3.5 seconds in this case). The steps(40, end) can be modified to change the number of steps, which can also affect speed. */
+        }
+
+        #progress-container {
+            width: 100%;
+            background-color: #f3f3f3;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 30px;
+            background: linear-gradient(to right, #f6046b, #f7d914);
+            transition: width 0.3s ease-in-out;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .upload-btn, #processButton {
+            display: inline-block;
+            padding: 10px 25px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: opacity 0.3s ease;
+        }
+
+        .upload-btn{
+            background-color: #007aff;
+        }
+
+        #processButton{
+            background-color: #47ca5f;
+            background-size: 200% 100%;
+            background-image: linear-gradient(to right, #f7542c 50%, #000 50%);
+            transition: background-position 0.5s ease;
+            background-position: right bottom;
+        }
+
+        .upload-btn:hover, #processButton:hover {
+            opacity: 0.9;
+        }
+
+        
+        #processButton:hover {
+            background-position: left bottom;
+        }
+
+        .control-panel{
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+    opacity: 1;
+    visibility: visible;
+        }
+
+        .control-panel.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+    </style>
+</head>
+
+<body>
+
+    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v2.4 👩‍🚀</h2>
+
+    <div style="margin-bottom: 20px">Suffix: <input type="text" id="suffix" value=""></div>
+
+    <div class="control-panel">
+        <div class="file-upload-wrapper">
+            <input type="file" id="csvFileInput" accept=".csv" style="display: none;" />
+            <button id="uploadButton" class="upload-btn">Upload Data</button>
+        </div>
+
+        <button id="processButton">Engine Start</button>
+
+    </div>
+
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <div id="output"></div>
+
+    <button id="downloadButton" disabled style="height: 50px; width: 200px;">Download XLSX</button>
+
+    <div style="margin-top: 20px">*After downloading the xlsx file, open and save it by using MS Excel.</div>
+    <div style="margin-top: 20px">*Combine multiple orders by the same customer with the same address.</div>
+    <div style="margin-top: 20px">*Separate the order (p1,p2,...) if there are a lot of items. (overweight)</div>
+    <hr>
+    <p>Log:</p>
+    <p>2025-12-12: Speed up, Support US.</p>
+    <p>2025-12-06: updated EUList, support PL, IT. Updated API key of zipcodebase.</p>
+    <p>2025-11-24: updated UKList, EUList</p>
+    <p>2025-11-07: added EP053E in electricList</p>
+    <p>2025-10-26: added BLRECBASE in electricList</p>
+    <p>2025-07-04: added SKU SWBASE</p>
+
+
+        <style>
+
+
+        /* The button style */
+        .link-button {
+            display: inline-block; /* Allows padding and margins */
+            padding: 12px 28px; /* Vertical and horizontal padding */
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background-color: #007bff; /* A pleasant blue */
+            border: none;
+            border-radius: 8px; /* Rounded corners */
+            text-decoration: none; /* Removes the underline from the link */
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+        }
+
+        /* A subtle hover effect */
+        .link-button:hover {
+            background-color: #0056b3; /* Darker blue */
+            box-shadow: 0 6px 16px rgba(0, 123, 255, 0.3);
+        }
+
+        /* A subtle active/click effect */
+        .link-button:active {
+            transform: scale(0.98); /* Slightly smaller when clicked */
+            background-color: #004a99;
+        }
+    </style>
+    <a href="state-finder.html" class="link-button">
+        Go to State Finder
+    </a>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <script>
+        let xlsxData;
+        document.getElementById("processButton").addEventListener("click", function () {
+            document.getElementById("output").innerHTML = ""
+            const fileInput = document.getElementById("csvFileInput");
+            const file = fileInput.files[0];
+
+            if (file) {
+
+                var controlPanel = document.querySelector('.control-panel');
+                if (controlPanel) {
+                    controlPanel.classList.add('hidden');
+                }
+
+                Papa.parse(file, {
+                    complete: function (results) {
+                        convertCSVToXLSX(results.data).then((convertedData) => {
+                            xlsxData = convertedData;
+                        }).catch((error) => {
+                            console.error('Error converting to XLSX:', error);
+                        });
+                    }
+                });
+            } else {
+                printLog("No file selected.")
+            }
+        });
+
+        document.getElementById('uploadButton').addEventListener('click', function() {
+    document.getElementById('csvFileInput').click();
+});
+
+        document.getElementById("downloadButton").addEventListener("click", function () {
+            console.log(xlsxData)
+            if (xlsxData) {
+                downloadXLSX(xlsxData, "output.xlsx");
+            } else {
+                console.error("No data available to download.");
+            }
+        });
+
+        async function convertCSVToXLSX(csvData) {
+            const EUList = ["DE", "FR", "AT", "BE", "GR", "IE", "NL", "UA", "CZ", "FI", "LT", "PT", "EE", "LV", "NO", "CH", "BG", "HR", "LU", "TR", "PL", "IT"];
+            const UKList = ["GB", "IE"];
+            const AUList = ["AU"];
+            const USList = ["US"];
+
+            const headers = [
+                "发货仓库",
+                "订单平台",
+                "卖家订单号",
+                "收件人国家",
+                "收件人邮编",
+                "收件人姓名",
+                "收件人省/州",
+                "收件人市",
+                "收件人详细地址",
+                "收件人详细地址2",
+                "收件人联系电话",
+                "收件人邮箱",
+                "运输方式简码",
+                "指定渠道(不优选)",
+                "收件人税号",
+                "发件人税号",
+                "收件人身份证号",
+                "是否选择子母单发货",
+                "SFP/VC",
+                "签名服务",
+                "运德编号",
+                "产品编码",
+                "数量",
+                "交易号",
+                "刊登号",
+                "保价单价（USD）"
+            ];
+            const data = [];
+
+            const electricList = [
+                "EP037E",
+                "EP038E",
+                "EP039E",
+                "EP040E",
+                "EP051E",
+                "EP052E",
+                "EP053E",
+                "RECBASE",
+                "BLRECBASE",
+                "LEDCIR",
+                "LEDSQ",
+                "MT01E",
+                "MT03E",
+                "SWBASE"
+            ]
+
+            let suffix = ""
+            var inputSuffixValue = document.getElementById('suffix').value;
+            if(inputSuffixValue){
+                suffix = inputSuffixValue
+            }
+
+            data.unshift(headers);
+            let promises = [];
+
+            if (csvData.length > 500) {
+                printLog("😈 seems you uploaded too many orders.")
+                return
+            }
+
+            printLog("🚀 Taking Off 🚀")
+
+            const progressBar = document.getElementById("progress-bar");
+            const totalRows = csvData.length - 2; // Subtracting 1 for the header and 1 for the last row 
+
+
+            for (let currentRowNo = 1; currentRowNo < csvData.length - 1; currentRowNo++) {
+
+                const row = csvData[currentRowNo];
+                let firstRowNo = currentRowNo;
+                const orderNo = row[0].substring(1) + suffix;
+
+                console.log("Start Processing: " + orderNo)
+                const country = row[42];
+                let postcode = row[40];
+                postcode = postcode.replace(/\s+/g, '');
+                postcode = postcode.replace(/'/g, '');
+                const name = row[34];
+                const city = row[39];
+                let state = row[41];
+                if (!state) {
+                    state = city
+                }
+                let address1 = row[36];
+                const address2 = row[37];
+                const company = row[38];
+                if (company) {
+                    address1 = company + ", " + address1
+                }
+                const phone = row[43].replace(/\D/g, '');
+                const email = "";
+                let shippingMethod = ""
+
+                // count sum of rows for same order
+                let rowSum = 1;
+                let nextRowNo = currentRowNo + 1
+                currentRowOrderNo = csvData[currentRowNo][0];
+                do {
+                    if (typeof csvData[nextRowNo] === 'undefined') {
+                        currentRowNo = nextRowNo - 1
+                        // end of the csv
+                        break;
+                    }
+
+                    nextRowOrderNo = csvData[nextRowNo][0];
+
+                    if (currentRowOrderNo == nextRowOrderNo) {
+                        rowSum++;
+                        nextRowNo++;
+                    } else {
+                        currentRowNo = nextRowNo - 1
+                        break;
+                    }
+                } while (1);
+
+                if (row[2] != "paid") {
+                    printLog("<b>Skipped</b> Special Order: " + orderNo + " <b style='margin-left:20px'>Reason: </b>" + row[2])
+                    continue;
+                }
+
+                if (row[4] != "unfulfilled") {
+                    printLog("<b>Skipped</b> Special Order: " + orderNo + " <b style='margin-left:20px'>Reason: </b>" + row[4])
+                    continue;
+                }
+
+                // handle SKU
+                let allItems = [];
+                for (let i = 0; i < rowSum; i++) {
+                    let skuQuantity = csvData[firstRowNo + i][16];
+                    for (k = 0; k < skuQuantity; k++) {
+                        let parts = csvData[firstRowNo + i][20].split("-");
+                        for (let x = 0; x < parts.length; x++) {
+                            if (parts[x] == "BLVIN" || parts[x] == "RGVIN") {
+                                if (EUList.includes(country)) {
+                                    parts[x] = "EU" + parts[x]
+                                }
+                                if (UKList.includes(country)) {
+                                    parts[x] = "UK" + parts[x]
+                                }
+                                if (AUList.includes(country)) {
+                                    parts[x] = "AU" + parts[x]
+                                }
+                                if (USList.includes(country)) {
+                                    parts[x] = "US" + parts[x]
+                                }
+                            }
+                            if (USList.includes(country)) {
+                                if (parts[x].startsWith("EP") && /\d$/.test(parts[x])) {
+                                    parts[x] = parts[x] + "-US";
+                                }
+                            }
+                            if (parts[x].includes("x")) {
+                                let match = parts[x].match(/^(\d+)x(.+)$/);
+
+                                if (match) {
+                                    let quantity = parseInt(match[1]);
+                                    let SKU = match[2];
+                                    if (USList.includes(country)) {
+                                        if (SKU.startsWith("EP") && /\d$/.test(SKU)) {
+                                            SKU = SKU + "-US";
+                                        }
+                                    }
+
+                                    for (let i = 0; i < quantity; i++) {
+                                        if (SKU == "BLVIN" || SKU == "RGVIN") {
+                                            if (EUList.includes(country)) {
+                                                SKU = "EU" + SKU
+                                            }
+                                            if (UKList.includes(country)) {
+                                                SKU = "UK" + SKU
+                                            }
+                                            if (AUList.includes(country)) {
+                                                SKU = "AU" + SKU
+                                            }
+                                            if (USList.includes(country)) {
+                                                SKU = "US" + SKU
+                                            }
+                                        }
+                                        allItems.push(SKU);
+                                    }
+                                } else {
+                                    allItems.push(parts[x]);
+                                }
+                            } else {
+                                allItems.push(parts[x]);
+                            }
+                        }
+                    }
+                }
+
+                // convert sku and counts to json
+                let itemCounts = {};
+                for (let i = 0; i < allItems.length; i++) {
+                    let item = allItems[i];
+                    if (itemCounts[item]) {
+                        itemCounts[item]++;
+                    } else {
+                        itemCounts[item] = 1;
+                    }
+                }
+                console.log(itemCounts)
+
+                // shipping method
+                let noOfKeys = Object.keys(itemCounts).length
+
+                if (EUList.includes(country)) {
+                    if (
+                        (itemCounts["EUBLVIN"] && noOfKeys == 1) ||
+                        (itemCounts["EURGVIN"] && noOfKeys == 1) ||
+                        (itemCounts["EUBLVIN"] && itemCounts["EURGVIN"] && noOfKeys == 2)
+                    ) {
+                        shippingMethod = "YTTHPH"
+                    } else {
+                        shippingMethod = "YTTHDD"
+                    }
+                } else if (UKList.includes(country) || AUList.includes(country) || USList.includes(country)) {
+                    let electricFound = false;
+                    for (let i = 0; i < electricList.length; i++) {
+                        const item = electricList[i];
+                        if (itemCounts[item]) {
+                            electricFound = true;
+                            break;
+                        }
+                    }
+                    if (electricFound) {
+                        shippingMethod = "YTTHDD"
+                    } else {
+                        shippingMethod = "YTTHPH"
+                    }
+                } else {
+                    console.log("Other shipping: skip")
+                    printLog("Other shipping: skipped: " + orderNo + " " + country)
+                    continue;
+                }
+
+                const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+                await delay(1000);
+
+                const progressPercentage = (currentRowNo / totalRows) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+
+                const keyValue = Object.entries(itemCounts);
+
+                const newRow = ["运德深圳A仓", "", orderNo, country, postcode, name, state, city, address1, address2, phone, email, shippingMethod, "", "", "", "", "否", "", "", "", keyValue[0][0], keyValue[0][1]];
+                data.push(newRow);
+
+                for (let i = 1; i < keyValue.length; i++) {
+                    const newExtraRow = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", keyValue[i][0], keyValue[i][1]];
+                    data.push(newExtraRow);
+                }
+
+                console.log("Finished: " + orderNo)
+                console.log("----------------")
+
+                printLog("Finished: " + orderNo + " - " + noOfKeys + " SKU(s).")
+            }
+            
+            printLog("✅ Mission Complete! ✅")
+            document.getElementById("downloadButton").disabled = false;
+            return data;
+        }
+
+
+        async function getStateNameFromPostcode(postcode, country) {
+            let postcodeToStateAPI = 'https://app.zipcodebase.com/api/v1/search?apikey=5f1d2b00-d25f-11f0-85f0-6995de82b700&codes=' + postcode + '&country=' + country;
+
+            try {
+                // Make a GET request to the postcode-to-state API.
+                const response = await fetch(postcodeToStateAPI);
+
+                // Check if the request was successful (status code 200).
+                if (response.status === 200) {
+                    const data = await response.json();
+                    const results = data.results[postcode];
+                    console.log(results);
+                    if (results && results.length > 0) {
+                        console.log(results[0].state_en)
+                        return (results[0].state_en);
+                    } else {
+                        console.log('No data found for the given postcode.');
+                        return null;
+                    }
+                } else {
+                    console.error('Failed to fetch state information.');
+                    return null;
+                }
+            } catch (error) {
+                console.error('An error occurred while fetching state information:', error);
+                return null;
+            }
+        }
+
+        function downloadXLSX(data, filename) {
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            XLSX.writeFile(wb, filename);
+        }
+
+        function printLog(logContent) {
+            const outputDiv = document.getElementById("output");
+            outputDiv.innerHTML += logContent + "<br>";
+        }
+    </script>
+</body>
+
+</html>

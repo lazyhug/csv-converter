@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Processing Dashboard Beta</title>
+    <!-- Tailwind CSS for Modern Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(20, 20, 25, 0.6);
+            --accent-blue: #3b82f6;
+            --accent-glow: #60a5fa;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Space Background Animation */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            z-index: -2;
+        }
+
+        .star-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            animation: move-twinkle 200s linear infinite;
+            background-image: 
+                radial-gradient(1px 1px at 10px 10px, white, rgba(0,0,0,0)), 
+                radial-gradient(1px 1px at 50px 70px, white, rgba(0,0,0,0)), 
+                radial-gradient(1.5px 1.5px at 100px 130px, white, rgba(0,0,0,0)), 
+                radial-gradient(1px 1px at 200px 30px, white, rgba(0,0,0,0));
+            background-size: 300px 300px;
+            opacity: 0.5;
+        }
+        
+        @keyframes move-twinkle {
+            from { transform: translateY(0); }
+            to { transform: translateY(-1000px); }
+        }
+
+        /* Glassmorphism Cards */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Custom Scrollbar for Logs */
+        #output::-webkit-scrollbar {
+            width: 8px;
+        }
+        #output::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.3);
+        }
+        #output::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+        #output::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* Typing Animation Refinement */
+        .typing-container h2 {
+            border-right: 2px solid #3b82f6;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #3b82f6 } }
+
+        /* Button Gradients */
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 25px rgba(37, 99, 235, 0.5);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4 sm:p-8">
+
+    <!-- Background Elements -->
+    <div class="stars"></div>
+    <div class="star-layer"></div>
+    
+    <!-- Main Dashboard Container -->
+    <main class="w-full max-w-5xl glass-panel rounded-3xl overflow-hidden relative z-10 animate-fade-in-up">
+        
+        <!-- Header -->
+        <header class="p-8 border-b border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 bg-white/5">
+            <div class="flex items-center gap-3 typing-container">
+                <i class="ph-fill ph-rocket-launch text-4xl text-blue-500"></i>
+                <h2 class="text-2xl md:text-3xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                    Space Mission Beta (New UI)
+                </h2>
+            </div>
+            
+            <a href="state-finder.html" class="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all text-sm font-medium border border-white/10">
+                <i class="ph ph-map-pin"></i>
+                State Finder Tool
+            </a>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3">
+            
+            <!-- Left Panel: Controls -->
+            <div class="col-span-1 p-8 border-r border-white/10 flex flex-col gap-6 control-panel">
+                
+                <!-- Suffix Input -->
+                <div class="space-y-2">
+                    <label class="text-xs uppercase tracking-widest text-gray-400 font-semibold pl-1">Order Suffix</label>
+                    <div class="relative group">
+                        <i class="ph ph-tag absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400"></i>
+                        <input type="text" id="suffix" placeholder="e.g., -ABC" 
+                            class="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all">
+                    </div>
+                </div>
+
+                <!-- File Upload -->
+                <div class="space-y-2">
+                    <label class="text-xs uppercase tracking-widest text-gray-400 font-semibold pl-1">Data Source (CSV)</label>
+                    <input type="file" id="csvFileInput" accept=".csv" class="hidden" />
+                    <button id="uploadButton" class="w-full h-24 border-2 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-blue-400/50 hover:bg-blue-500/5 transition-all group">
+                        <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="ph ph-upload-simple text-xl text-blue-400"></i>
+                        </div>
+                        <span class="text-sm text-gray-400 group-hover:text-gray-200">Upload CSV File</span>
+                    </button>
+                </div>
+
+                <!-- Launch Button -->
+                <button id="processButton" class="btn-success w-full py-4 rounded-xl font-bold text-white text-lg tracking-wide flex items-center justify-center gap-2 mt-4">
+                    <i class="ph-fill ph-play"></i>
+                    START PROCESSING
+                </button>
+
+                <!-- Status/Progress -->
+                <div class="space-y-2 mt-2">
+                    <div class="flex justify-between text-xs text-gray-400">
+                        <span>Processing Status</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div id="progress-container" class="h-3 bg-black/50 rounded-full overflow-hidden border border-white/5">
+                        <div id="progress-bar" class="h-full w-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-300 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                    </div>
+                </div>
+
+                <!-- Download -->
+                <button id="downloadButton" disabled class="w-full py-3 rounded-xl font-semibold text-white bg-white/5 border border-white/10 cursor-not-allowed disabled:opacity-50 disabled:grayscale transition-all hover:bg-white/10 flex items-center justify-center gap-2">
+                    <i class="ph ph-download"></i>
+                    Download Report (XLSX)
+                </button>
+
+                <!-- Warnings -->
+                <div class="text-xs text-gray-500 space-y-1 p-3 bg-yellow-500/5 border border-yellow-500/10 rounded-lg">
+                    <p class="flex items-start gap-1"><i class="ph-fill ph-info text-blue-400 mt-0.5"></i> Note: Verify output in Excel.</p>
+                    <p class="pl-4">Manually combine orders with same address.</p>
+                    <p class="pl-4">Separate overweight items if needed.</p>
+                </div>
+
+            </div>
+
+            <!-- Right Panel: Logs & Info -->
+            <div class="col-span-1 lg:col-span-2 p-0 flex flex-col">
+                
+                <!-- Terminal Header -->
+                <div class="px-6 py-4 border-b border-white/10 bg-black/20 flex items-center justify-between">
+                    <span class="text-xs font-mono text-blue-400 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        SYSTEM LOGS
+                    </span>
+                    <span class="text-xs text-gray-600 font-mono">/system/logs</span>
+                </div>
+
+                <!-- Terminal Output -->
+                <div class="flex-grow p-6 bg-black/40 min-h-[400px] relative font-mono text-sm">
+                    <div id="output" class="absolute inset-4 overflow-y-auto text-green-400/90 leading-relaxed font-['JetBrains_Mono']">
+                        <div class="opacity-50 mb-2">> System initialized...</div>
+                        <div class="opacity-50 mb-2">> Waiting for file input...</div>
+                    </div>
+                </div>
+
+                <!-- Changelog Footer -->
+                <div class="p-6 border-t border-white/10 bg-white/5">
+                    <h3 class="text-xs uppercase tracking-wider text-gray-400 font-bold mb-3">Changelog</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-xs text-gray-500">
+                        <div class="flex gap-2">
+                            <span class="text-blue-400 font-mono">2025-12-06</span>
+                            <span>EU Sector updated (PL, IT). API Key updated.</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="text-blue-400 font-mono">2025-11-24</span>
+                            <span>UK & EU zone definitions updated.</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="text-blue-400 font-mono">2025-11-07</span>
+                            <span>Added EP053E to product matrix.</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="text-blue-400 font-mono">2025-10-26</span>
+                            <span>Added BLRECBASE to product matrix.</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="text-blue-400 font-mono">2025-07-04</span>
+                            <span>New SKU definition: SWBASE.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <!-- Application Logic (Original Functionality Preserved) -->
+    <script>
+        let xlsxData;
+
+        // UI Helper for file input visuals
+        document.getElementById('csvFileInput').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : "Upload CSV File";
+            const btn = document.getElementById('uploadButton');
+            if(e.target.files[0]) {
+                btn.querySelector('span').innerText = fileName;
+                btn.querySelector('i').className = 'ph-fill ph-file-csv text-xl text-green-400';
+                btn.classList.add('border-green-500/50', 'bg-green-500/10');
+            }
+        });
+
+        document.getElementById("processButton").addEventListener("click", function () {
+            document.getElementById("output").innerHTML = "";
+            const fileInput = document.getElementById("csvFileInput");
+            const file = fileInput.files[0];
+
+            // Visual feedback for processing state
+            const processBtn = document.getElementById("processButton");
+            processBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> PROCESSING DATA...';
+            processBtn.disabled = true;
+            processBtn.classList.add('opacity-75');
+
+            if (file) {
+                // Modified to handle the new UI structure
+                // var controlPanel = document.querySelector('.control-panel'); 
+                // We keep the panel visible in this new design, just disable inputs if needed
+
+                Papa.parse(file, {
+                    complete: function (results) {
+                        convertCSVToXLSX(results.data).then((convertedData) => {
+                            xlsxData = convertedData;
+                            // Reset button state
+                            processBtn.innerHTML = '<i class="ph-fill ph-check-circle"></i> COMPLETE';
+                            processBtn.classList.remove('btn-success');
+                            processBtn.classList.add('bg-gray-600');
+                            setTimeout(() => {
+                                processBtn.innerHTML = '<i class="ph-fill ph-play"></i> START PROCESSING';
+                                processBtn.classList.add('btn-success');
+                                processBtn.classList.remove('bg-gray-600');
+                                processBtn.disabled = false;
+                                processBtn.classList.remove('opacity-75');
+                            }, 3000);
+                        }).catch((error) => {
+                            console.error('Error converting to XLSX:', error);
+                            processBtn.disabled = false;
+                            processBtn.innerHTML = 'RETRY';
+                        });
+                    }
+                });
+            } else {
+                printLog("<span class='text-red-400'>[ERROR] No file selected. Please upload a CSV.</span>");
+                processBtn.innerHTML = 'RETRY';
+                processBtn.disabled = false;
+                processBtn.classList.remove('opacity-75');
+            }
+        });
+
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            document.getElementById('csvFileInput').click();
+        });
+
+        document.getElementById("downloadButton").addEventListener("click", function () {
+            console.log(xlsxData)
+            if (xlsxData) {
+                downloadXLSX(xlsxData, "Order_Processing_Report.xlsx");
+            } else {
+                console.error("No data available to download.");
+            }
+        });
+
+        async function convertCSVToXLSX(csvData) {
+            const EUList = ["DE", "FR", "AT", "BE", "GR", "IE", "NL", "UA", "CZ", "FI", "LT", "PT", "EE", "LV", "NO", "CH", "BG", "HR", "LU", "TR", "PL", "IT"];
+            const UKList = ["GB", "IE"];
+            const AUList = ["AU"];
+
+            const headers = [
+                "发货仓库", "订单平台", "卖家订单号", "收件人国家", "收件人邮编", "收件人姓名",
+                "收件人省/州", "收件人市", "收件人详细地址", "收件人详细地址2", "收件人联系电话",
+                "收件人邮箱", "运输方式简码", "指定渠道(不优选)", "收件人税号", "发件人税号",
+                "收件人身份证号", "是否选择子母单发货", "SFP/VC", "签名服务", "运德编号",
+                "产品编码", "数量", "交易号", "刊登号", "保价单价（USD）"
+            ];
+            const data = [];
+
+            const electricList = [
+                "EP037E", "EP038E", "EP039E", "EP040E", "EP051E", "EP052E", "EP053E",
+                "RECBASE", "BLRECBASE", "LEDCIR", "LEDSQ", "MT01E", "MT03E", "SWBASE"
+            ];
+
+            let suffix = ""
+            var inputSuffixValue = document.getElementById('suffix').value;
+            if(inputSuffixValue){
+                suffix = inputSuffixValue
+            }
+
+            data.unshift(headers);
+            let promises = [];
+
+            if (csvData.length > 500) {
+                printLog("<span class='text-red-400'>[WARNING] Large dataset (>500 rows). Performance may be affected.</span>")
+                return
+            }
+
+            printLog("<span class='text-blue-400'>Starting data processing...</span>")
+
+            const progressBar = document.getElementById("progress-bar");
+            // Added percent text update
+            const progressPercentText = document.getElementById("progress-percent"); 
+            const totalRows = csvData.length - 2; 
+
+            for (let currentRowNo = 1; currentRowNo < csvData.length - 1; currentRowNo++) {
+
+                const row = csvData[currentRowNo];
+                let firstRowNo = currentRowNo;
+                // Add check to prevent error if row is empty or malformed
+                if (!row || row.length === 0) continue;
+                
+                const orderNo = row[0].substring(1) + suffix;
+
+                console.log("Start Processing: " + orderNo)
+                const country = row[42];
+                let postcode = row[40];
+                if(postcode) {
+                    postcode = postcode.replace(/\s+/g, '');
+                    postcode = postcode.replace(/'/g, '');
+                } else {
+                    postcode = "";
+                }
+                
+                const name = row[34];
+                let state = "XX";
+                const city = row[39];
+                let address1 = row[36];
+                const address2 = row[37];
+                const company = row[38];
+                if (company) {
+                    address1 = company + ", " + address1
+                }
+                const phone = row[43] ? row[43].replace(/\D/g, '') : "";
+                const email = "";
+                let shippingMethod = ""
+
+                // count sum of rows for same order
+                let rowSum = 1;
+                let nextRowNo = currentRowNo + 1
+                currentRowOrderNo = csvData[currentRowNo][0];
+                do {
+                    if (typeof csvData[nextRowNo] === 'undefined') {
+                        currentRowNo = nextRowNo - 1
+                        break;
+                    }
+                    nextRowOrderNo = csvData[nextRowNo][0];
+                    if (currentRowOrderNo == nextRowOrderNo) {
+                        rowSum++;
+                        nextRowNo++;
+                    } else {
+                        currentRowNo = nextRowNo - 1
+                        break;
+                    }
+                } while (1);
+
+                if (row[2] != "paid") {
+                    printLog("<span class='text-yellow-500'>[SKIPPED]</span> Order: " + orderNo + " (Status: " + row[2] + ")")
+                    continue;
+                }
+
+                if (row[4] != "unfulfilled") {
+                    printLog("<span class='text-yellow-500'>[SKIPPED]</span> Order: " + orderNo + " (Fulfillment: " + row[4] + ")")
+                    continue;
+                }
+
+                // handle SKU
+                let allItems = [];
+                for (let i = 0; i < rowSum; i++) {
+                    let skuQuantity = csvData[firstRowNo + i][16];
+                    for (k = 0; k < skuQuantity; k++) {
+                        let parts = csvData[firstRowNo + i][20].split("-");
+                        for (let x = 0; x < parts.length; x++) {
+                            if (parts[x] == "BLVIN" || parts[x] == "RGVIN") {
+                                if (EUList.includes(country)) parts[x] = "EU" + parts[x]
+                                if (UKList.includes(country)) parts[x] = "UK" + parts[x]
+                                if (AUList.includes(country)) parts[x] = "AU" + parts[x]
+                            }
+                            if (parts[x].includes("x")) {
+                                let match = parts[x].match(/^(\d+)x(.+)$/);
+                                if (match) {
+                                    let quantity = parseInt(match[1]);
+                                    let SKU = match[2];
+                                    for (let i = 0; i < quantity; i++) {
+                                        if (SKU == "BLVIN" || SKU == "RGVIN") {
+                                            if (EUList.includes(country)) SKU = "EU" + SKU
+                                            if (UKList.includes(country)) SKU = "UK" + SKU
+                                            if (AUList.includes(country)) SKU = "AU" + SKU
+                                        }
+                                        allItems.push(SKU);
+                                    }
+                                } else {
+                                    allItems.push(parts[x]);
+                                }
+                            } else {
+                                allItems.push(parts[x]);
+                            }
+                        }
+                    }
+                }
+
+                // convert sku and counts to json
+                let itemCounts = {};
+                for (let i = 0; i < allItems.length; i++) {
+                    let item = allItems[i];
+                    if (itemCounts[item]) {
+                        itemCounts[item]++;
+                    } else {
+                        itemCounts[item] = 1;
+                    }
+                }
+                console.log(itemCounts)
+
+                // shipping method
+                let noOfKeys = Object.keys(itemCounts).length
+
+                if (EUList.includes(country)) {
+                    if (
+                        (itemCounts["EUBLVIN"] && noOfKeys == 1) ||
+                        (itemCounts["EURGVIN"] && noOfKeys == 1) ||
+                        (itemCounts["EUBLVIN"] && itemCounts["EURGVIN"] && noOfKeys == 2)
+                    ) {
+                        shippingMethod = "YTTHPH"
+                    } else {
+                        shippingMethod = "YTTHDD"
+                    }
+                } else if (UKList.includes(country) || AUList.includes(country)) {
+                    let electricFound = false;
+                    for (let i = 0; i < electricList.length; i++) {
+                        const item = electricList[i];
+                        if (itemCounts[item]) {
+                            electricFound = true;
+                            break;
+                        }
+                    }
+                    if (electricFound) {
+                        shippingMethod = "YTTHDD"
+                    } else {
+                        shippingMethod = "YTTHPH"
+                    }
+                } else {
+                    console.log("Other shipping: skip")
+                    printLog("<span class='text-yellow-500'>[ERROR]</span> Unknown Shipping Region: " + orderNo + " (" + country + ")")
+                    continue;
+                }
+
+                const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+                await delay(10000); // 10 second delay per original script
+
+                const progressPercentage = (currentRowNo / totalRows) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+                if(progressPercentText) progressPercentText.innerText = Math.round(progressPercentage) + "%";
+
+                promises.push(
+                    getStateNameFromPostcode(postcode, country)
+                        .then(stateEn => {
+                            if (stateEn) {
+                                state = stateEn
+                            } else {
+                                console.log('State information not found.');
+                                printLog('<span class="text-orange-400">[INFO]</span> State lookup failed for ' + orderNo)
+                            }
+
+                            const keyValue = Object.entries(itemCounts);
+
+                            const newRow = ["运德深圳A仓", "", orderNo, country, postcode, name, state, city, address1, address2, phone, email, shippingMethod, "", "", "", "", "否", "", "", "", keyValue[0][0], keyValue[0][1]];
+                            data.push(newRow);
+
+                            for (let i = 1; i < keyValue.length; i++) {
+                                const newExtraRow = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", keyValue[i][0], keyValue[i][1]];
+                                data.push(newExtraRow);
+                            }
+
+                            console.log("Finished: " + orderNo)
+                            printLog("Processed: <span class='text-white font-bold'>" + orderNo + "</span> (" + noOfKeys + " item types)")
+                        })
+                );
+            }
+            await Promise.all(promises);
+            printLog("<span class='text-green-400 font-bold text-lg mt-2 block'>Processing complete. Data ready for download.</span>")
+            
+            // Enable download button and styling
+            const dlBtn = document.getElementById("downloadButton");
+            dlBtn.disabled = false;
+            dlBtn.classList.remove('cursor-not-allowed', 'bg-white/5', 'text-white', 'grayscale', 'opacity-50');
+            dlBtn.classList.add('btn-primary'); // Make it blue and prominent
+
+            // Set progress to 100% explicitly
+            progressBar.style.width = `100%`;
+            if(progressPercentText) progressPercentText.innerText = "100%";
+
+            return data;
+        }
+
+        async function getStateNameFromPostcode(postcode, country) {
+            let postcodeToStateAPI = 'https://app.zipcodebase.com/api/v1/search?apikey=5f1d2b00-d25f-11f0-85f0-6995de82b700&codes=' + postcode + '&country=' + country;
+
+            try {
+                const response = await fetch(postcodeToStateAPI);
+                if (response.status === 200) {
+                    const data = await response.json();
+                    const results = data.results[postcode];
+                    console.log(results);
+                    if (results && results.length > 0) {
+                        console.log(results[0].state_en)
+                        return (results[0].state_en);
+                    } else {
+                        console.log('No data found for the given postcode.');
+                        return null;
+                    }
+                } else {
+                    console.error('Failed to fetch state information.');
+                    return null;
+                }
+            } catch (error) {
+                console.error('An error occurred while fetching state information:', error);
+                return null;
+            }
+        }
+
+        function downloadXLSX(data, filename) {
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            XLSX.writeFile(wb, filename);
+        }
+
+        function printLog(logContent) {
+            const outputDiv = document.getElementById("output");
+            outputDiv.innerHTML += `<div>> ${logContent}</div>`;
+            // Auto scroll to bottom
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
