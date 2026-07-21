@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,67 +97,20 @@
             opacity: 0.9;
         }
 
-        
         #processButton:hover {
             background-position: left bottom;
         }
 
         .control-panel{
             transition: opacity 0.5s ease, visibility 0.5s ease;
-    opacity: 1;
-    visibility: visible;
+            opacity: 1;
+            visibility: visible;
         }
 
         .control-panel.hidden {
-    opacity: 0;
-    visibility: hidden;
-}
-
-    </style>
-</head>
-
-<body>
-
-    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v2.7 👩‍🚀</h2>
-
-    <div style="margin-bottom: 20px">Suffix: <input type="text" id="suffix" value=""></div>
-
-    <div class="control-panel">
-        <div class="file-upload-wrapper">
-            <input type="file" id="csvFileInput" accept=".csv" style="display: none;" />
-            <button id="uploadButton" class="upload-btn">Upload Data</button>
-        </div>
-
-        <button id="processButton">Engine Start</button>
-
-    </div>
-
-    <div id="progress-container">
-        <div id="progress-bar"></div>
-    </div>
-
-    <div id="output"></div>
-
-    <button id="downloadButton" disabled style="height: 50px; width: 200px;">Download XLSX</button>
-
-    <div style="margin-top: 20px">*After downloading the xlsx file, open and save it by using MS Excel.</div>
-    <div style="margin-top: 20px">*Combine multiple orders by the same customer with the same address.</div>
-    <div style="margin-top: 20px">*Separate the order (p1,p2,...) if there are a lot of items. (overweight)</div>
-    <hr>
-    <p>Log:</p>
-    <p>2026-07-13: fixed EP053E in electricList</p>
-    <p>2026-07-13: added EP20XE in electricList</p>
-    <p>2026-04-03: Support FLBASE.</p>
-    <p>2025-12-12: Speed up, Support US.</p>
-    <p>2025-12-06: updated EUList, support PL, IT. Updated API key of zipcodebase.</p>
-    <p>2025-11-24: updated UKList, EUList</p>
-    <p>2025-11-07: added EP053E in electricList</p>
-    <p>2025-10-26: added BLRECBASE in electricList</p>
-    <p>2025-07-04: added SKU SWBASE</p>
-
-
-        <style>
-
+            opacity: 0;
+            visibility: hidden;
+        }
 
         /* The button style */
         .link-button {
@@ -189,7 +141,48 @@
             background-color: #004a99;
         }
     </style>
-    <a href="state-finder.html" class="link-button">
+</head>
+
+<body>
+    <h2 class="typing-animation" style="letter-spacing: 2px;">Space Mission v2.8 👩‍🚀</h2>
+
+    <div style="margin-bottom: 20px">Suffix: <input type="text" id="suffix" value=""></div>
+
+    <div class="control-panel">
+        <div class="file-upload-wrapper">
+            <input type="file" id="csvFileInput" accept=".csv" style="display: none;" />
+            <button id="uploadButton" class="upload-btn">Upload Data</button>
+        </div>
+
+        <button id="processButton">Engine Start</button>
+
+    </div>
+
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <div id="output"></div>
+
+    <button id="downloadButton" disabled style="height: 50px; width: 200px;">Download XLSX</button>
+
+    <div style="margin-top: 20px">*After downloading the xlsx file, open and save it by using MS Excel.</div>
+    <div style="margin-top: 20px">*Combine multiple orders by the same customer with the same address.</div>
+    <div style="margin-top: 20px">*Separate the order (p1,p2,...) if there are a lot of items. (overweight)</div>
+    <hr>
+    <p>Log:</p>
+    <p>2026-07-21: now can upload the exported file to wedo without saving from Excel</p>
+    <p>2026-07-21: fixed EP053E in electricList</p>
+    <p>2026-07-13: added EP20XE in electricList</p>
+    <p>2026-04-03: Support FLBASE.</p>
+    <p>2025-12-12: Speed up, Support US.</p>
+    <p>2025-12-06: updated EUList, support PL, IT. Updated API key of zipcodebase.</p>
+    <p>2025-11-24: updated UKList, EUList</p>
+    <p>2025-11-07: added EP053E in electricList</p>
+    <p>2025-10-26: added BLRECBASE in electricList</p>
+    <p>2025-07-04: added SKU SWBASE</p>
+
+    <a href="state-finder.html" class="link-button" style="margin-top: 20px;">
         Go to State Finder
     </a>
 
@@ -225,8 +218,8 @@
         });
 
         document.getElementById('uploadButton').addEventListener('click', function() {
-    document.getElementById('csvFileInput').click();
-});
+            document.getElementById('csvFileInput').click();
+        });
 
         document.getElementById("downloadButton").addEventListener("click", function () {
             console.log(xlsxData)
@@ -402,6 +395,7 @@
                                     parts[x] = parts[x] + "-US";
                                 }
                             }
+                            
                             if (parts[x].includes("x")) {
                                 let match = parts[x].match(/^(\d+)x(.+)$/);
 
@@ -513,7 +507,6 @@
             return data;
         }
 
-
         async function getStateNameFromPostcode(postcode, country) {
             let postcodeToStateAPI = 'https://app.zipcodebase.com/api/v1/search?apikey=5f1d2b00-d25f-11f0-85f0-6995de82b700&codes=' + postcode + '&country=' + country;
 
@@ -547,7 +540,15 @@
             const ws = XLSX.utils.aoa_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-            XLSX.writeFile(wb, filename);
+            
+            // Fix: Include bookSST to generate the Shared String Table
+            // This prevents backend system parsing errors.
+            const writeOptions = {
+                bookSST: true,
+                bookType: 'xlsx'
+            };
+            
+            XLSX.writeFile(wb, filename, writeOptions);
         }
 
         function printLog(logContent) {
@@ -556,5 +557,4 @@
         }
     </script>
 </body>
-
 </html>
